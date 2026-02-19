@@ -9,6 +9,7 @@ export interface ColumnConfig {
     };
     headerConfig: {
         label: string;
+        tooltip: string;
         numeric: boolean;
         sortable?: boolean;
         sx?: Record<string, any>;

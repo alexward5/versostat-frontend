@@ -14,6 +14,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "#",
+                tooltip: "Rank",
                 numeric: true,
                 sortable: false,
                 sx: {
@@ -33,6 +34,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Player",
+                tooltip: "Player Name",
                 numeric: false,
                 sx: {
                     paddingLeft: "8px",
@@ -48,6 +50,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Team",
+                tooltip: "Team Name",
                 numeric: true,
             },
         },
@@ -60,6 +63,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Position",
+                tooltip: "Player Position",
                 numeric: true,
             },
         },
@@ -72,6 +76,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Price",
+                tooltip: "Player Price",
                 numeric: true,
             },
         },
@@ -84,6 +89,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Points",
+                tooltip: "FPL Points",
                 numeric: true,
             },
         },
@@ -96,6 +102,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Games",
+                tooltip: "Games Played",
                 numeric: true,
             },
         },
@@ -108,6 +115,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Minutes",
+                tooltip: "Minutes Played",
                 numeric: true,
             },
         },
@@ -120,6 +128,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Goals",
+                tooltip: "Goals Scored",
                 numeric: true,
             },
         },
@@ -132,6 +141,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Assists",
+                tooltip: "Assists",
                 numeric: true,
             },
         },
@@ -144,6 +154,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "xG",
+                tooltip: "Expected Goals",
                 numeric: true,
             },
         },
@@ -156,6 +167,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "xA",
+                tooltip: "Expected Assists",
                 numeric: true,
             },
         },
@@ -168,6 +180,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "xGI",
+                tooltip: "Expected Goal Involvement",
                 numeric: true,
             },
         },
@@ -180,6 +193,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "xGAP",
+                tooltip: "Expected Goal + Assist Points",
                 numeric: true,
             },
         },
@@ -192,6 +206,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "SoT",
+                tooltip: "Shots on Target",
                 numeric: true,
             },
         },
@@ -204,6 +219,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "BCC",
+                tooltip: "Big Chances Created",
                 numeric: true,
             },
         },
@@ -216,6 +232,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "KP",
+                tooltip: "Key Passes",
                 numeric: true,
             },
         },
@@ -228,6 +245,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "DC",
+                tooltip: "Defensive Contributions",
                 numeric: true,
             },
         },
@@ -240,6 +258,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "BPS",
+                tooltip: "Bonus Points",
                 numeric: true,
             },
         },
@@ -253,6 +272,7 @@ const tableConfig: TableConfig = {
             },
             headerConfig: {
                 label: "Selected %",
+                tooltip: "Selected Percentage",
                 numeric: true,
                 sx: {
                     paddingRight: "12px",
