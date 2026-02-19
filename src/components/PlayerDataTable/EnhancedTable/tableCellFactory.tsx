@@ -1,7 +1,16 @@
 import Box from "@mui/material/Box";
 import TableCell from "@mui/material/TableCell";
 import TableSortLabel from "@mui/material/TableSortLabel";
+import Tooltip from "@mui/material/Tooltip";
 import { visuallyHidden } from "@mui/utils";
+
+const headerTooltipSlotProps = {
+    popper: {
+        popperOptions: {
+            strategy: "fixed" as const,
+        },
+    },
+};
 import type DisplayedData from "../../../types/DisplayedData";
 import type { ColumnConfig } from "../../../types/TableColumn";
 
@@ -40,11 +49,6 @@ const getTeamLogoMapping = (teamName: string): string => {
         Tottenham: "Tottenham-Hotspur-logo.png",
         "West Ham": "West-Ham-United-FC-logo.png",
         Wolves: "Wolverhampton-Wanderers-logo.png",
-        // Possible variants from other sources
-        "Sheffield Utd": "Premier-League-Logo.png",
-        Luton: "Premier-League-Logo.png",
-        Ipswich: "Premier-League-Logo.png",
-        Southampton: "Premier-League-Logo.png",
     };
 
     const filename = map[teamName] || "Premier-League-Logo.png";
@@ -312,7 +316,14 @@ export const createHeaderCells = (
                             },
                         }}
                     >
-                        {headCell.label}
+                        <Tooltip
+                            title={headerConfig.tooltip}
+                            placement="top"
+                            arrow
+                            slotProps={headerTooltipSlotProps}
+                        >
+                            <span>{headCell.label}</span>
+                        </Tooltip>
                         {orderBy === headCell.id ? (
                             <Box component="span" sx={visuallyHidden}>
                                 {order === "asc"
@@ -322,7 +333,14 @@ export const createHeaderCells = (
                         ) : null}
                     </TableSortLabel>
                 ) : (
-                    headCell.label
+                    <Tooltip
+                        title={headerConfig.tooltip}
+                        placement="top"
+                        arrow
+                        slotProps={headerTooltipSlotProps}
+                    >
+                        <span>{headCell.label}</span>
+                    </Tooltip>
                 )}
             </TableCell>
         );
