@@ -193,6 +193,9 @@ const theme = createTheme({
                         top: 14,
                     },
                 }),
+                valueLabel: {
+                    fontSize: "0.875rem",
+                },
             },
         },
         MuiTableRow: {
@@ -282,6 +285,13 @@ const theme = createTheme({
                     "& .MuiTablePagination-actions": {
                         marginLeft: "8px",
                     },
+                },
+            },
+        },
+        MuiTooltip: {
+            styleOverrides: {
+                tooltip: {
+                    fontSize: "0.875rem",
                 },
             },
         },
