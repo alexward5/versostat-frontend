@@ -130,7 +130,7 @@ const EnhancedTable = memo(forwardRef<HTMLDivElement, Props>((props, ref) => {
                             </TableRow>
                         );
                     })}
-                    {emptyRows > 0 &&
+                    {isSmallScreen && emptyRows > 0 &&
                         Array.from({ length: emptyRows }).map((_, index) => (
                             <EmptyTableRow
                                 key={`empty-${index}`}
