@@ -267,6 +267,10 @@ const theme = createTheme({
                 root: {
                     color: themeMainTextColor,
                     backgroundColor: darkThemeSurfaceColor_5,
+                    // Ripple previews the destination color (unselected → will become selected)
+                    "& .MuiTouchRipple-root": {
+                        color: darkThemeSurfaceColor_3,
+                    },
                     "&:hover": {
                         backgroundColor: darkThemeSurfaceColor_4,
                     },
@@ -276,6 +280,10 @@ const theme = createTheme({
                     },
                     "&.Mui-selected": {
                         backgroundColor: darkThemeSurfaceColor_3,
+                        // Ripple previews the destination color (selected → will become unselected)
+                        "& .MuiTouchRipple-root": {
+                            color: darkThemeSurfaceColor_5,
+                        },
                         "&:hover": {
                             backgroundColor: darkThemeSurfaceColor_4,
                         },
