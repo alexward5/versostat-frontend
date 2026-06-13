@@ -1,4 +1,4 @@
-import { alpha, createTheme } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
 
 const drawerWidth = "240px";
 const appBarHeightXs = "52px";
@@ -268,12 +268,20 @@ const theme = createTheme({
                     color: themeMainTextColor,
                     backgroundColor: darkThemeSurfaceColor_5,
                     "&:hover": {
-                        backgroundColor: alpha(darkThemeSurfaceColor_2, 0.3),
+                        backgroundColor: darkThemeSurfaceColor_4,
+                    },
+                    // Keyboard-focused (arrow key navigation): no background change
+                    "&.Mui-focusVisible": {
+                        backgroundColor: darkThemeSurfaceColor_5,
                     },
                     "&.Mui-selected": {
-                        backgroundColor: darkThemeSurfaceColor_2,
+                        backgroundColor: darkThemeSurfaceColor_3,
                         "&:hover": {
-                            backgroundColor: darkThemeSurfaceColor_2,
+                            backgroundColor: darkThemeSurfaceColor_4,
+                        },
+                        // Keyboard-focused selected item: keep selected color
+                        "&.Mui-focusVisible": {
+                            backgroundColor: darkThemeSurfaceColor_3,
                         },
                     },
                 },
