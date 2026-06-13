@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
-import GameweekSlider from "./GameweekSlider/GameweekSlider";
+import GameweekSelect from "./GameweekSelect/GameweekSelect";
 import PositionSelect from "./PositionSelect/PositionSelect";
 import PriceSelect from "./PriceSelect/PriceSelect";
 import TeamFilter from "./TeamFilter/TeamFilter";
@@ -70,7 +70,7 @@ export default function DrawerContent(props: Props) {
                     },
                 }}
             >
-                <GameweekSlider
+                <GameweekSelect
                     gameweekRange={gameweekRange}
                     setGameweekRange={setGameweekRange}
                 />

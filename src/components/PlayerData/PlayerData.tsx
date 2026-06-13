@@ -83,9 +83,12 @@ export default function PlayerData(props: Props) {
         const maxPrice = Math.max(...playerCosts).toFixed(1);
         const minPrice = Math.min(...playerCosts).toFixed(1);
         const teamNames = data.teams.map((team) => team.name);
-        const numGameweeks = data.events.filter(
-            (event) => event.finished || event.is_current,
-        ).length;
+        const numGameweeks = Math.max(
+            0,
+            ...data.players.flatMap((p) =>
+                p.player_gameweek_data.map((gw) => gw.fpl_round),
+            ),
+        );
 
         startTransition(() => {
             setDerivedState({
