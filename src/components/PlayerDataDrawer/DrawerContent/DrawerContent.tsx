@@ -61,7 +61,7 @@ export default function DrawerContent(props: Props) {
             <Stack
                 spacing={2}
                 sx={{
-                    padding: theme.spacing(2, 2),
+                    padding: theme.spacing(2, 1.5),
                     // On small screens, make the entire drawer scrollable
                     flexGrow: { xs: 0, md: 1 },
                     overflowY: { xs: "visible", md: "auto" },

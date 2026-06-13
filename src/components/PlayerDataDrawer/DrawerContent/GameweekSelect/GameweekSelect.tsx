@@ -1,9 +1,22 @@
 import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Typography from "@mui/material/Typography";
 import { useData } from "../../../../contexts/DataContext";
 import { useTheme } from "@mui/material/styles";
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const VISIBLE_ITEMS = 5.5;
+
+const menuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * VISIBLE_ITEMS + ITEM_PADDING_TOP,
+        },
+    },
+};
 
 type Props = {
     gameweekRange: number[];
@@ -46,43 +59,51 @@ export default function GameweekSelect(props: Props) {
                 sx={{
                     width: "100%",
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    gap: 0,
                 }}
             >
-                <Select
-                    value={gameweekRange[0]}
-                    onChange={(e) => handleStartChange(Number(e.target.value))}
-                    sx={{ flex: 1 }}
-                >
-                    {allGameweeks
-                        .filter((gw) => gw <= gameweekRange[1])
-                        .map((gw) => (
-                            <MenuItem key={gw} value={gw}>
-                                GW{gw}
-                            </MenuItem>
-                        ))}
-                </Select>
+                <FormControl fullWidth sx={{ flex: 1 }}>
+                    <Select
+                        value={gameweekRange[0]}
+                        onChange={(e) =>
+                            handleStartChange(Number(e.target.value))
+                        }
+                        MenuProps={menuProps}
+                    >
+                        {allGameweeks
+                            .filter((gw) => gw <= gameweekRange[1])
+                            .map((gw) => (
+                                <MenuItem key={gw} value={gw} dense>
+                                    GW{gw}
+                                </MenuItem>
+                            ))}
+                    </Select>
+                </FormControl>
                 <Typography
                     variant="subtitle1"
-                    fontWeight={"bold"}
-                    sx={{ padding: "0px 4px" }}
+                    fontWeight="bold"
+                    sx={{ padding: "0px 4px", flexShrink: 0 }}
                 >
                     to
                 </Typography>
-                <Select
-                    value={gameweekRange[1]}
-                    onChange={(e) => handleEndChange(Number(e.target.value))}
-                    sx={{ flex: 1 }}
-                >
-                    {allGameweeks
-                        .filter((gw) => gw >= gameweekRange[0])
-                        .map((gw) => (
-                            <MenuItem key={gw} value={gw}>
-                                GW{gw}
-                            </MenuItem>
-                        ))}
-                </Select>
+                <FormControl fullWidth sx={{ flex: 1 }}>
+                    <Select
+                        value={gameweekRange[1]}
+                        onChange={(e) =>
+                            handleEndChange(Number(e.target.value))
+                        }
+                        MenuProps={menuProps}
+                    >
+                        {allGameweeks
+                            .filter((gw) => gw >= gameweekRange[0])
+                            .map((gw) => (
+                                <MenuItem key={gw} value={gw} dense>
+                                    GW{gw}
+                                </MenuItem>
+                            ))}
+                    </Select>
+                </FormControl>
             </Box>
         </Box>
     );
