@@ -196,13 +196,16 @@ export default function PlayerData(props: Props) {
                         position: "relative",
                     }}
                 >
-                    <LoadingIndicator variant="table" show={showTableLoading} />
-                    <PlayerDataTable
-                        displayedPositions={displayedPositions}
-                        displayedTeams={displayedTeams}
-                        playerPriceRange={playerPriceRange}
-                        gameweekRange={gameweekRange}
-                    />
+                    {showTableLoading ? (
+                        <LoadingIndicator variant="table" />
+                    ) : (
+                        <PlayerDataTable
+                            displayedPositions={displayedPositions}
+                            displayedTeams={displayedTeams}
+                            playerPriceRange={playerPriceRange}
+                            gameweekRange={gameweekRange}
+                        />
+                    )}
                 </Box>
             </Fade>
             <PlayerDataDrawer

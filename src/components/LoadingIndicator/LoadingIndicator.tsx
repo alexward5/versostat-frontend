@@ -33,8 +33,7 @@ export default function LoadingIndicator({
                               justifyContent: "center",
                               alignItems: "center",
                               zIndex: 1,
-                              backgroundColor: "background.default",
-                              opacity: 0.9,
+                              backgroundColor: theme.darkThemeSurfaceColor_1,
                           }
                         : {
                               position: "fixed",
