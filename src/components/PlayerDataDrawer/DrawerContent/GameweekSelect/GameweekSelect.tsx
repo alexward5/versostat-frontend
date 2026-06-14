@@ -26,12 +26,10 @@ type Props = {
 export default function GameweekSelect(props: Props) {
     const { gameweekRange, setGameweekRange } = props;
 
-    const { players } = useData();
+    const { events } = useData();
     const numGameweeks = Math.max(
         0,
-        ...players.flatMap((p) =>
-            p.player_gameweek_data.map((gw) => gw.fpl_round),
-        ),
+        ...events.filter((e) => e.finished || e.is_current).map((e) => e.id),
     );
 
     const allGameweeks = Array.from({ length: numGameweeks }, (_, i) => i + 1);

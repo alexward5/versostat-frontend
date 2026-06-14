@@ -1,11 +1,13 @@
 import {
     useState,
     useEffect,
+    useRef,
     startTransition,
     type Dispatch,
     type SetStateAction,
 } from "react";
 import { gql } from "../../__generated__/gql";
+import { NetworkStatus } from "@apollo/client";
 import { DataProvider } from "../../contexts/DataContext";
 import Box from "@mui/material/Box";
 import Fade from "@mui/material/Fade";
@@ -14,9 +16,11 @@ import PlayerDataDrawer from "../PlayerDataDrawer/PlayerDataDrawer";
 import LoadingIndicator from "../LoadingIndicator/LoadingIndicator";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@apollo/client";
+import type { GetPlayerDataQuery } from "../../__generated__/graphql";
+import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
 const GET_PLAYER_DATA = gql(`
-    query GetData {
+    query GetPlayerData($gwStart: Int!, $gwEnd: Int!) {
         players {
             fpl_player_id
             fpl_web_name
@@ -24,22 +28,22 @@ const GET_PLAYER_DATA = gql(`
             fpl_player_position
             fpl_player_cost
             fpl_selected_by_percent
-            player_gameweek_data {
-                fpl_minutes
-                fpl_round
-                fpl_total_points
-                fpl_goals_scored
-                fpl_assists
-                fpl_bps
-                fpl_clean_sheet
-                fpl_defensive_contribution
-                fpl_expected_goals
-                fpl_expected_assists
-                fpl_xgi
-                sm_shots_on_target
-                sm_big_chances_created
-                sm_key_passes
-                calc_xgap
+            player_stats(gwStart: $gwStart, gwEnd: $gwEnd) {
+                games_played
+                sum_minutes
+                sum_points
+                sum_goals
+                sum_assists
+                sum_bps
+                sum_cleansheets
+                sum_defensive_contributions
+                sum_xg
+                sum_xa
+                sum_xgi
+                sum_shots_on_target
+                sum_big_chances_created
+                sum_key_passes
+                sum_xgap
             }
         }
         teams {
@@ -74,10 +78,28 @@ export default function PlayerData(props: Props) {
         "FWD",
     ]);
     const [derivedState, setDerivedState] = useState<DerivedState | null>(null);
+    const [tableLoading, setTableLoading] = useState(false);
 
-    const { loading, data } = useQuery(GET_PLAYER_DATA);
+    const { data, networkStatus, refetch } = useQuery(GET_PLAYER_DATA, {
+        variables: { gwStart: 1, gwEnd: 38 },
+        notifyOnNetworkStatusChange: true,
+    });
+
+    // Keep the last successful response so DataProvider always has data to
+    // render even while Apollo clears `data` during a refetch with new variables.
+    const lastDataRef = useRef<GetPlayerDataQuery | null>(null);
+    if (data) lastDataRef.current = data;
+
+    const isInitialLoading = networkStatus === NetworkStatus.loading;
+    const showTableLoading = useDelayedLoading(tableLoading, {
+        delay: 200,
+        minDuration: 500,
+    });
+
     useEffect(() => {
         if (!data?.players || !data?.teams || !data?.events) return;
+
+        setTableLoading(false);
 
         const playerCosts = data.players.map((p) => p.fpl_player_cost);
         const maxPrice = Math.max(...playerCosts).toFixed(1);
@@ -85,29 +107,33 @@ export default function PlayerData(props: Props) {
         const teamNames = data.teams.map((team) => team.name);
         const numGameweeks = Math.max(
             0,
-            ...data.players.flatMap((p) =>
-                p.player_gameweek_data.map((gw) => gw.fpl_round),
-            ),
+            ...data.events
+                .filter((e) => e.finished || e.is_current)
+                .map((e) => e.id),
         );
 
         startTransition(() => {
-            setDerivedState({
-                playerPriceRange: [String(minPrice), String(maxPrice)],
-                displayedTeams: teamNames,
-                gameweekRange: [1, numGameweeks],
-            });
+            setDerivedState((prev) =>
+                prev
+                    ? { ...prev }
+                    : {
+                          playerPriceRange: [
+                              String(minPrice),
+                              String(maxPrice),
+                          ],
+                          displayedTeams: teamNames,
+                          gameweekRange: [1, numGameweeks],
+                      },
+            );
         });
     }, [data]);
 
     const theme = useTheme();
 
-    if (loading || !data?.players || !derivedState) return <LoadingIndicator />;
+    if (isInitialLoading || !lastDataRef.current || !derivedState)
+        return <LoadingIndicator />;
 
-    const {
-        playerPriceRange,
-        displayedTeams,
-        gameweekRange,
-    } = derivedState;
+    const { playerPriceRange, displayedTeams, gameweekRange } = derivedState;
 
     const setDisplayedTeams: Dispatch<SetStateAction<string[]>> = (value) =>
         setDerivedState((prev) =>
@@ -136,24 +162,20 @@ export default function PlayerData(props: Props) {
                   }
                 : prev,
         );
-    const setGameweekRange: Dispatch<SetStateAction<number[]>> = (value) =>
+    const setGameweekRange: Dispatch<SetStateAction<number[]>> = (value) => {
+        const next =
+            typeof value === "function"
+                ? (value(gameweekRange) as [number, number])
+                : (value as [number, number]);
+        setTableLoading(true);
+        refetch({ gwStart: next[0], gwEnd: next[1] });
         setDerivedState((prev) =>
-            prev
-                ? {
-                      ...prev,
-                      gameweekRange:
-                          typeof value === "function"
-                              ? (value(prev.gameweekRange) as [
-                                    number,
-                                    number,
-                                ])
-                              : (value as [number, number]),
-                  }
-                : prev,
+            prev ? { ...prev, gameweekRange: next } : prev,
         );
+    };
 
     return (
-        <DataProvider value={data}>
+        <DataProvider value={lastDataRef.current!}>
             <Fade in={true} timeout={500}>
                 <Box
                     sx={{
@@ -171,8 +193,10 @@ export default function PlayerData(props: Props) {
                         },
                         width: { md: `calc(100% - ${theme.drawerWidth})` },
                         ml: { md: `${theme.drawerWidth}` },
+                        position: "relative",
                     }}
                 >
+                    <LoadingIndicator variant="table" show={showTableLoading} />
                     <PlayerDataTable
                         displayedPositions={displayedPositions}
                         displayedTeams={displayedTeams}

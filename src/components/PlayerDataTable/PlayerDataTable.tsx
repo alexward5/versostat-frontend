@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect, useDeferredValue } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { orderBy } from "natural-orderby";
 import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
@@ -30,18 +30,15 @@ export default function PlayerDataTable(props: Props) {
     const [orderColumn, setOrderBy] =
         useState<keyof DisplayedData>("sumPoints");
 
-    // Scroll to top of table when user changes page
     const tableRef = useRef<HTMLDivElement>(null);
     const scrollToTop = () => {
         tableRef.current?.scrollTo({ top: 0, behavior: "smooth" });
     };
 
-    // Reset to first page of table when any filter changes
     useEffect(() => {
         setPage(0);
         scrollToTop();
     }, [displayedPositions, displayedTeams, playerPriceRange, gameweekRange]);
-
 
     const { players } = useData();
     const theme = useTheme();
@@ -56,86 +53,41 @@ export default function PlayerDataTable(props: Props) {
         setOrderBy(property);
     };
 
-    // Defer gameweek range so the slider stays responsive while the
-    // table recalculates in a lower-priority background render
-    const deferredGameweekRange = useDeferredValue(gameweekRange);
-
-    // Filter by Position and calculate stats
+    // Filter by position and map server-aggregated stats to DisplayedData shape
     const positionFilteredData = useMemo(() => {
-        const filtered = players.filter((player) =>
-            displayedPositions.includes(player.fpl_player_position),
-        );
-
-        return filtered.map((player) => {
-            let gamesPlayed = 0;
-            let sumMinutes = 0;
-            let sumxG = 0;
-            let sumxA = 0;
-            let sumxGI = 0;
-            let sumxGAP = 0;
-            let sumShotsOnTarget = 0;
-            let sumBigChancesCreated = 0;
-            let sumKeyPasses = 0;
-            let sumPoints = 0;
-            let sumGoals = 0;
-            let sumAssists = 0;
-            let sumBPS = 0;
-            let sumCleansheets = 0;
-            let sumDefensiveContributions = 0;
-
-            player.player_gameweek_data.forEach((playerGameweek) => {
-                if (
-                    playerGameweek.fpl_round >= deferredGameweekRange[0] &&
-                    playerGameweek.fpl_round <= deferredGameweekRange[1]
-                ) {
-                    if (playerGameweek.fpl_minutes > 0) {
-                        gamesPlayed++;
-                    }
-                    sumMinutes += playerGameweek.fpl_minutes;
-                    sumxG += playerGameweek.fpl_expected_goals;
-                    sumxA += playerGameweek.fpl_expected_assists;
-                    sumxGI += playerGameweek.fpl_xgi;
-                    sumxGAP += playerGameweek.calc_xgap;
-                    sumShotsOnTarget += playerGameweek.sm_shots_on_target;
-                    sumBigChancesCreated +=
-                        playerGameweek.sm_big_chances_created;
-                    sumKeyPasses += playerGameweek.sm_key_passes;
-                    sumPoints += playerGameweek.fpl_total_points;
-                    sumGoals += playerGameweek.fpl_goals_scored;
-                    sumAssists += playerGameweek.fpl_assists;
-                    sumDefensiveContributions +=
-                        playerGameweek.fpl_defensive_contribution;
-                    sumBPS += playerGameweek.fpl_bps;
-                    sumCleansheets += playerGameweek.fpl_clean_sheet;
-                }
+        return players
+            .filter((player) =>
+                displayedPositions.includes(player.fpl_player_position),
+            )
+            .map((player) => {
+                const s = player.player_stats;
+                return {
+                    rank: 0,
+                    fplPlayerId: player.fpl_player_id,
+                    fplWebName: player.fpl_web_name,
+                    fplTeamName: player.fpl_team_name,
+                    fplPlayerPosition: player.fpl_player_position,
+                    fplPlayerCost: player.fpl_player_cost.toFixed(1),
+                    fplSelectedByPercent:
+                        player.fpl_selected_by_percent.toFixed(1),
+                    gamesPlayed: s.games_played,
+                    sumMinutes: s.sum_minutes,
+                    sumxG: s.sum_xg.toFixed(1),
+                    sumxA: s.sum_xa.toFixed(1),
+                    sumxGI: s.sum_xgi.toFixed(1),
+                    sumxGAP: s.sum_xgap.toFixed(1),
+                    sumShotsOnTarget: s.sum_shots_on_target,
+                    sumBigChancesCreated: s.sum_big_chances_created,
+                    sumKeyPasses: s.sum_key_passes,
+                    sumPoints: s.sum_points,
+                    sumGoals: s.sum_goals,
+                    sumAssists: s.sum_assists,
+                    sumDefensiveContributions: s.sum_defensive_contributions,
+                    sumBPS: s.sum_bps,
+                    sumCleansheets: s.sum_cleansheets,
+                };
             });
-
-            return {
-                rank: 0, // Placeholder, will be set later on
-                fplPlayerId: player.fpl_player_id,
-                fplWebName: player.fpl_web_name,
-                fplTeamName: player.fpl_team_name,
-                fplPlayerPosition: player.fpl_player_position,
-                fplPlayerCost: player.fpl_player_cost.toFixed(1),
-                fplSelectedByPercent: player.fpl_selected_by_percent.toFixed(1),
-                gamesPlayed,
-                sumMinutes,
-                sumxG: sumxG.toFixed(1),
-                sumxA: sumxA.toFixed(1),
-                sumxGI: sumxGI.toFixed(1),
-                sumxGAP: sumxGAP.toFixed(1),
-                sumShotsOnTarget,
-                sumBigChancesCreated,
-                sumKeyPasses,
-                sumPoints,
-                sumGoals,
-                sumAssists,
-                sumDefensiveContributions,
-                sumBPS,
-                sumCleansheets,
-            };
-        });
-    }, [players, displayedPositions, deferredGameweekRange]);
+    }, [players, displayedPositions]);
 
     // Sort and Rank
     const rankedData = useMemo(() => {
@@ -181,7 +133,6 @@ export default function PlayerDataTable(props: Props) {
                         overscrollBehaviorY: "none",
                     }}
                     onWheel={(e) => {
-                        // Allow vertical scrolling to pass through to the page on small screens
                         if (
                             e.deltaY !== 0 &&
                             Math.abs(e.deltaY) > Math.abs(e.deltaX)
