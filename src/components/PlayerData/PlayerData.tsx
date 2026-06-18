@@ -17,7 +17,6 @@ import LoadingIndicator from "../LoadingIndicator/LoadingIndicator";
 import { useTheme } from "@mui/material/styles";
 import { useQuery } from "@apollo/client";
 import type { GetPlayerDataQuery } from "../../__generated__/graphql";
-import { useDelayedLoading } from "../../hooks/useDelayedLoading";
 
 const GET_PLAYER_DATA = gql(`
     query GetPlayerData($gwStart: Int!, $gwEnd: Int!) {
@@ -78,7 +77,6 @@ export default function PlayerData(props: Props) {
         "FWD",
     ]);
     const [derivedState, setDerivedState] = useState<DerivedState | null>(null);
-    const [tableLoading, setTableLoading] = useState(false);
 
     const { data, networkStatus, refetch } = useQuery(GET_PLAYER_DATA, {
         variables: { gwStart: 1, gwEnd: 38 },
@@ -91,15 +89,10 @@ export default function PlayerData(props: Props) {
     if (data) lastDataRef.current = data;
 
     const isInitialLoading = networkStatus === NetworkStatus.loading;
-    const showTableLoading = useDelayedLoading(tableLoading, {
-        delay: 200,
-        minDuration: 500,
-    });
+    const isRefetching = networkStatus === NetworkStatus.setVariables;
 
     useEffect(() => {
         if (!data?.players || !data?.teams || !data?.events) return;
-
-        setTableLoading(false);
 
         const playerCosts = data.players.map((p) => p.fpl_player_cost);
         const maxPrice = Math.max(...playerCosts).toFixed(1);
@@ -167,7 +160,6 @@ export default function PlayerData(props: Props) {
             typeof value === "function"
                 ? (value(gameweekRange) as [number, number])
                 : (value as [number, number]);
-        setTableLoading(true);
         refetch({ gwStart: next[0], gwEnd: next[1] });
         setDerivedState((prev) =>
             prev ? { ...prev, gameweekRange: next } : prev,
@@ -196,7 +188,7 @@ export default function PlayerData(props: Props) {
                         position: "relative",
                     }}
                 >
-                    {showTableLoading ? (
+                    {isRefetching ? (
                         <LoadingIndicator variant="table" />
                     ) : (
                         <PlayerDataTable
