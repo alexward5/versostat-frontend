@@ -1,22 +1,18 @@
 import {
-    useState,
+    createContext,
+    useContext,
     useEffect,
     useRef,
+    useState,
     startTransition,
+    type ReactNode,
     type Dispatch,
     type SetStateAction,
 } from "react";
-import { gql } from "../../__generated__/gql";
-import { NetworkStatus } from "@apollo/client";
-import { DataProvider } from "../../contexts/DataContext";
-import Box from "@mui/material/Box";
-import Fade from "@mui/material/Fade";
-import PlayerDataTable from "../PlayerDataTable/PlayerDataTable";
-import PlayerDataDrawer from "../PlayerDataDrawer/PlayerDataDrawer";
-import LoadingIndicator from "../LoadingIndicator/LoadingIndicator";
-import { useTheme } from "@mui/material/styles";
-import { useQuery } from "@apollo/client";
-import type { GetPlayerDataQuery } from "../../__generated__/graphql";
+import { gql } from "../__generated__/gql";
+import { NetworkStatus, useQuery } from "@apollo/client";
+import { DataProvider } from "./DataContext";
+import type { GetPlayerDataQuery } from "../__generated__/graphql";
 
 const GET_PLAYER_DATA = gql(`
     query GetPlayerData($gwStart: Int!, $gwEnd: Int!) {
@@ -56,21 +52,44 @@ const GET_PLAYER_DATA = gql(`
     }
 `);
 
-type Props = {
-    handleDrawerClose: () => void;
-    handleDrawerTransitionEnd: () => void;
-    mobileOpen: boolean;
-};
-
 type DerivedState = {
     playerPriceRange: [string, string];
     displayedTeams: string[];
     gameweekRange: [number, number];
 };
 
-export default function PlayerData(props: Props) {
-    const { handleDrawerClose, handleDrawerTransitionEnd, mobileOpen } = props;
+type PlayersDataContextValue = {
+    // True until the first response and its derived filters are available
+    isInitialLoading: boolean;
+    // True while refetching after a gameweek-range change
+    isRefetching: boolean;
+    displayedPositions: string[];
+    setDisplayedPositions: Dispatch<SetStateAction<string[]>>;
+    displayedTeams: string[];
+    setDisplayedTeams: Dispatch<SetStateAction<string[]>>;
+    playerPriceRange: string[];
+    setPlayerPriceRange: Dispatch<SetStateAction<string[]>>;
+    gameweekRange: number[];
+    setGameweekRange: Dispatch<SetStateAction<number[]>>;
+};
 
+const PlayersDataContext = createContext<PlayersDataContextValue | undefined>(
+    undefined,
+);
+
+export function usePlayersData(): PlayersDataContextValue {
+    const context = useContext(PlayersDataContext);
+    if (!context) {
+        throw new Error(
+            "usePlayersData must be used within a PlayersDataProvider",
+        );
+    }
+    return context;
+}
+
+// Owns the player query, derived filter state, and loading flags. Raw data is
+// exposed via DataProvider/useData; filters and loading via usePlayersData
+export function PlayerDataProvider({ children }: { children: ReactNode }) {
     const [displayedPositions, setDisplayedPositions] = useState<string[]>([
         "DEF",
         "MID",
@@ -83,13 +102,16 @@ export default function PlayerData(props: Props) {
         notifyOnNetworkStatusChange: true,
     });
 
-    // Keep the last successful response so DataProvider always has data to
-    // render even while Apollo clears `data` during a refetch with new variables.
+    // Keep the last successful response so consumers always have data to render
+    // even while Apollo clears `data` during a refetch with new variables
     const lastDataRef = useRef<GetPlayerDataQuery | null>(null);
     if (data) lastDataRef.current = data;
 
-    const isInitialLoading = networkStatus === NetworkStatus.loading;
     const isRefetching = networkStatus === NetworkStatus.setVariables;
+    const isInitialLoading =
+        networkStatus === NetworkStatus.loading ||
+        !lastDataRef.current ||
+        !derivedState;
 
     useEffect(() => {
         if (!data?.players || !data?.teams || !data?.events) return;
@@ -121,13 +143,6 @@ export default function PlayerData(props: Props) {
         });
     }, [data]);
 
-    const theme = useTheme();
-
-    if (isInitialLoading || !lastDataRef.current || !derivedState)
-        return <LoadingIndicator />;
-
-    const { playerPriceRange, displayedTeams, gameweekRange } = derivedState;
-
     const setDisplayedTeams: Dispatch<SetStateAction<string[]>> = (value) =>
         setDerivedState((prev) =>
             prev
@@ -140,6 +155,7 @@ export default function PlayerData(props: Props) {
                   }
                 : prev,
         );
+
     const setPlayerPriceRange: Dispatch<SetStateAction<string[]>> = (value) =>
         setDerivedState((prev) =>
             prev
@@ -155,10 +171,12 @@ export default function PlayerData(props: Props) {
                   }
                 : prev,
         );
+
     const setGameweekRange: Dispatch<SetStateAction<number[]>> = (value) => {
+        const current = derivedState?.gameweekRange ?? [1, 38];
         const next =
             typeof value === "function"
-                ? (value(gameweekRange) as [number, number])
+                ? (value(current) as [number, number])
                 : (value as [number, number]);
         refetch({ gwStart: next[0], gwEnd: next[1] });
         setDerivedState((prev) =>
@@ -166,58 +184,30 @@ export default function PlayerData(props: Props) {
         );
     };
 
+    const value: PlayersDataContextValue = {
+        isInitialLoading,
+        isRefetching,
+        displayedPositions,
+        setDisplayedPositions,
+        // Filters fall back to placeholders before data loads; consumers that
+        // read them are only rendered once `isInitialLoading` is false
+        displayedTeams: derivedState?.displayedTeams ?? [],
+        setDisplayedTeams,
+        playerPriceRange: derivedState?.playerPriceRange ?? ["0", "0"],
+        setPlayerPriceRange,
+        gameweekRange: derivedState?.gameweekRange ?? [1, 38],
+        setGameweekRange,
+    };
+
     return (
-        <DataProvider value={lastDataRef.current!}>
-            <Fade in={true} timeout={500}>
-                <Box
-                    sx={{
-                        height: {
-                            xs: "auto",
-                            md: `calc(100% - ${theme.appBarHeightMd})`,
-                        },
-                        minHeight: {
-                            xs: `calc(100vh - ${theme.appBarHeightXs})`,
-                            md: "auto",
-                        },
-                        mt: {
-                            xs: 0,
-                            md: theme.appBarHeightMd,
-                        },
-                        width: { md: `calc(100% - ${theme.drawerWidth})` },
-                        ml: { md: `${theme.drawerWidth}` },
-                        position: "relative",
-                    }}
-                >
-                    <LoadingIndicator variant="table" show={isRefetching} />
-                    <Fade
-                        in={!isRefetching}
-                        timeout={{ enter: 300, exit: 200 }}
-                        unmountOnExit
-                    >
-                        <Box sx={{ height: "100%" }}>
-                            <PlayerDataTable
-                                displayedPositions={displayedPositions}
-                                displayedTeams={displayedTeams}
-                                playerPriceRange={playerPriceRange}
-                                gameweekRange={gameweekRange}
-                            />
-                        </Box>
-                    </Fade>
-                </Box>
-            </Fade>
-            <PlayerDataDrawer
-                mobileOpen={mobileOpen}
-                handleDrawerTransitionEnd={handleDrawerTransitionEnd}
-                handleDrawerClose={handleDrawerClose}
-                displayedPositions={displayedPositions}
-                setDisplayedPositions={setDisplayedPositions}
-                displayedTeams={displayedTeams}
-                setDisplayedTeams={setDisplayedTeams}
-                playerPriceRange={playerPriceRange}
-                setPlayerPriceRange={setPlayerPriceRange}
-                gameweekRange={gameweekRange}
-                setGameweekRange={setGameweekRange}
-            />
-        </DataProvider>
+        <PlayersDataContext.Provider value={value}>
+            {lastDataRef.current ? (
+                <DataProvider value={lastDataRef.current}>
+                    {children}
+                </DataProvider>
+            ) : (
+                children
+            )}
+        </PlayersDataContext.Provider>
     );
 }

@@ -5,20 +5,18 @@ import GameweekSelect from "./GameweekSelect/GameweekSelect";
 import PositionSelect from "./PositionSelect/PositionSelect";
 import PriceSelect from "./PriceSelect/PriceSelect";
 import TeamFilter from "./TeamFilter/TeamFilter";
+import Logo from "../../Layout/Logo";
 import { useTheme } from "@mui/material/styles";
+import { usePlayersData } from "../../../contexts/PlayersDataContext";
 
 type Props = {
-    gameweekRange: number[];
-    setGameweekRange: React.Dispatch<React.SetStateAction<number[]>>;
-    displayedTeams: string[];
-    setDisplayedTeams: React.Dispatch<React.SetStateAction<string[]>>;
-    displayedPositions: string[];
-    setDisplayedPositions: React.Dispatch<React.SetStateAction<string[]>>;
-    playerPriceRange: string[];
-    setPlayerPriceRange: React.Dispatch<React.SetStateAction<string[]>>;
+    // Renders the logo header (mobile overlay only); the desktop sidebar's logo
+    // comes from the Layout, so it passes false to avoid a duplicate
+    showLogo?: boolean;
 };
 
-export default function DrawerContent(props: Props) {
+export default function DrawerContent({ showLogo = true }: Props) {
+    const theme = useTheme();
     const {
         gameweekRange,
         setGameweekRange,
@@ -28,36 +26,33 @@ export default function DrawerContent(props: Props) {
         setDisplayedPositions,
         playerPriceRange,
         setPlayerPriceRange,
-    } = props;
-
-    const theme = useTheme();
+    } = usePlayersData();
 
     return (
         <Box
             sx={{
                 display: "flex",
-                height: "100vh",
+                height: "100%",
                 flexDirection: "column",
                 backgroundColor: theme.darkThemeSurfaceColor_1,
-                // On small screens, make the entire drawer scrollable
+                // Desktop sidebar is a plain grid cell (no MUI Paper), so set text color here
+                color: theme.palette.text.primary,
+                // Make the whole drawer scrollable on small screens
                 overflowY: { xs: "auto", md: "hidden" },
             }}
         >
-            <Toolbar
-                variant="regular"
-                sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    borderBottom: `1px solid ${theme.darkThemeBorderColor}`,
-                }}
-            >
-                <Box
-                    component="img"
-                    src="/logo-dark.png"
-                    alt="Logo"
-                    sx={{ height: "38px", width: "auto" }}
-                />
-            </Toolbar>
+            {showLogo && (
+                <Toolbar
+                    variant="regular"
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        borderBottom: `1px solid ${theme.darkThemeBorderColor}`,
+                    }}
+                >
+                    <Logo />
+                </Toolbar>
+            )}
             <Stack
                 spacing={2}
                 sx={{
