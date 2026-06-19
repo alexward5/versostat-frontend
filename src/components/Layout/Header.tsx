@@ -29,7 +29,7 @@ export default function Header(props: Props) {
                 edge="start"
                 onClick={onMenuClick}
                 sx={{
-                    color: theme.themeMainColor,
+                    color: theme.palette.secondary.main,
                     display: { md: "none" },
                 }}
             >
