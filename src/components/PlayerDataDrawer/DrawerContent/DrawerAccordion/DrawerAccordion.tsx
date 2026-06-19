@@ -46,7 +46,7 @@ export default function DrawerAccordion({ summaryText, children }: Props) {
                         borderBottomRightRadius: 0,
                     },
                     "& .MuiAccordionSummary-expandIconWrapper": {
-                        color: theme.themeMainTextColor,
+                        color: theme.palette.text.primary,
                     },
                 }}
             >

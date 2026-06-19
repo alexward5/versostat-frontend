@@ -47,7 +47,7 @@ export default function LoadingIndicator({
             >
                 <CircularProgress
                     sx={{
-                        color: theme.themeMainColor,
+                        color: theme.palette.secondary.main,
                     }}
                 />
             </Box>

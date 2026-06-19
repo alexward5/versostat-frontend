@@ -24,8 +24,7 @@
     line-height: var(--line-height);
   }
 
-  /* Global scrollbar styling */
-  /* Thumb: theme.darkThemeSurfaceColor_6 (#8f8f96) */
+  /* Global scrollbar styling — standalone thumb color, not exposed on MUI theme */
   /* Track: transparent - remains invisible even on hover */
   * {
     scrollbar-color: #8f8f96 transparent;

@@ -305,10 +305,10 @@ export const createHeaderCells = (
                             alignItems: "center",
                             height: "38px",
                             "&:hover": {
-                                color: theme.themeMainTextColor,
+                                color: theme.palette.text.primary,
                             },
                             "&.Mui-active .MuiTableSortLabel-icon": {
-                                color: theme.themeMainColor,
+                                color: theme.palette.secondary.main,
                                 marginRight: "2px",
                             },
                             "& .MuiTableSortLabel-icon": {

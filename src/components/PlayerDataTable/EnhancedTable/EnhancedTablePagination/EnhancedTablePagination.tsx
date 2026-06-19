@@ -45,7 +45,7 @@ export default function EnhancedTablePagination(props: Props) {
                 select: {
                     sx: {
                         "& .MuiSelect-icon": {
-                            color: theme.themeMainTextColor,
+                            color: theme.palette.text.primary,
                         },
                     },
                     inputProps: {

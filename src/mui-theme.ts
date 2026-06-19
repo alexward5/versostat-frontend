@@ -4,44 +4,27 @@ const drawerWidth = "240px";
 const appBarHeightXs = "52px";
 const appBarHeightMd = "56px";
 
-const themeMainTextColor = "#FFFFFF";
+const textColor = "#FFFFFF";
+const accentColor = "#49e688";
 
-const themeMainColor = "#49e688";
-const themeMainColor_2 = "#67e995";
-const themeMainColor_3 = "#7feda2";
-const themeMainColor_4 = "#94f0af";
-const themeMainColor_5 = "#a8f3bd";
-const themeMainColor_6 = "#baf6ca";
+const surface = {
+    1: "#191924",
+    2: "#2e2e39",
+    3: "#45444e",
+    4: "#5d5c65",
+    5: "#76757d",
+} as const;
 
-const darkThemeSurfaceColor_1 = "#191924";
-const darkThemeSurfaceColor_2 = "#2e2e39";
-const darkThemeSurfaceColor_3 = "#45444e";
-const darkThemeSurfaceColor_4 = "#5d5c65";
-const darkThemeSurfaceColor_5 = "#76757d";
-const darkThemeSurfaceColor_6 = "#8f8f96";
-
-// Use module augmentation to add new variables to Theme and ThemeOptions
 declare module "@mui/material/styles" {
     interface Theme {
         drawerWidth: string;
         appBarHeightXs: string;
         appBarHeightMd: string;
-
-        themeMainTextColor: string;
-
-        themeMainColor: string;
-        themeMainColor_2: string;
-        themeMainColor_3: string;
-        themeMainColor_4: string;
-        themeMainColor_5: string;
-        themeMainColor_6: string;
-
         darkThemeSurfaceColor_1: string;
         darkThemeSurfaceColor_2: string;
         darkThemeSurfaceColor_3: string;
         darkThemeSurfaceColor_4: string;
         darkThemeSurfaceColor_5: string;
-        darkThemeSurfaceColor_6: string;
         darkThemeBorderColor: string;
     }
 
@@ -49,73 +32,48 @@ declare module "@mui/material/styles" {
         drawerWidth: string;
         appBarHeightXs: string;
         appBarHeightMd: string;
-
-        themeMainTextColor: string;
-
-        themeMainColor: string;
-        themeMainColor_2: string;
-        themeMainColor_3: string;
-        themeMainColor_4: string;
-        themeMainColor_5: string;
-        themeMainColor_6: string;
-
         darkThemeSurfaceColor_1: string;
         darkThemeSurfaceColor_2: string;
         darkThemeSurfaceColor_3: string;
         darkThemeSurfaceColor_4: string;
         darkThemeSurfaceColor_5: string;
-        darkThemeSurfaceColor_6: string;
         darkThemeBorderColor: string;
     }
 }
 
 const theme = createTheme({
-    // Theme variables to use in components
-    drawerWidth: drawerWidth,
-    appBarHeightXs: appBarHeightXs,
-    appBarHeightMd: appBarHeightMd,
+    drawerWidth,
+    appBarHeightXs,
+    appBarHeightMd,
 
-    themeMainTextColor: themeMainTextColor,
+    darkThemeSurfaceColor_1: surface[1],
+    darkThemeSurfaceColor_2: surface[2],
+    darkThemeSurfaceColor_3: surface[3],
+    darkThemeSurfaceColor_4: surface[4],
+    darkThemeSurfaceColor_5: surface[5],
+    darkThemeBorderColor: surface[5],
 
-    themeMainColor: themeMainColor,
-    themeMainColor_2: themeMainColor_2,
-    themeMainColor_3: themeMainColor_3,
-    themeMainColor_4: themeMainColor_4,
-    themeMainColor_5: themeMainColor_5,
-    themeMainColor_6: themeMainColor_6,
-
-    darkThemeSurfaceColor_1: darkThemeSurfaceColor_1,
-    darkThemeSurfaceColor_2: darkThemeSurfaceColor_2,
-    darkThemeSurfaceColor_3: darkThemeSurfaceColor_3,
-    darkThemeSurfaceColor_4: darkThemeSurfaceColor_4,
-    darkThemeSurfaceColor_5: darkThemeSurfaceColor_5,
-    darkThemeSurfaceColor_6: darkThemeSurfaceColor_6,
-    darkThemeBorderColor: darkThemeSurfaceColor_5,
-
-    // Custom font from Google fonts
     typography: {
         fontFamily: '"Inter", sans-serif',
         fontWeightBold: 800,
     },
     palette: {
         primary: {
-            main: themeMainTextColor,
+            main: textColor,
+        },
+        secondary: {
+            main: accentColor,
         },
         text: {
-            primary: themeMainTextColor,
+            primary: textColor,
         },
     },
-    // Component style overrides
     components: {
         MuiAppBar: {
             styleOverrides: {
                 root: ({ theme }) => ({
                     height: appBarHeightXs,
                     minHeight: appBarHeightXs,
-                    [theme.breakpoints.up("xs")]: {
-                        height: appBarHeightXs,
-                        minHeight: appBarHeightXs,
-                    },
                     [theme.breakpoints.up("md")]: {
                         height: appBarHeightMd,
                         minHeight: appBarHeightMd,
@@ -128,10 +86,6 @@ const theme = createTheme({
                 root: ({ theme }) => ({
                     minHeight: appBarHeightXs,
                     height: appBarHeightXs,
-                    [theme.breakpoints.up("xs")]: {
-                        minHeight: appBarHeightXs,
-                        height: appBarHeightXs,
-                    },
                     [theme.breakpoints.up("md")]: {
                         minHeight: appBarHeightMd,
                         height: appBarHeightMd,
@@ -157,19 +111,18 @@ const theme = createTheme({
             styleOverrides: {
                 root: {
                     "&.Mui-checked": {
-                        color: themeMainTextColor,
+                        color: textColor,
                     },
                     "&.MuiCheckbox-indeterminate": {
-                        color: themeMainTextColor,
+                        color: textColor,
                     },
-                    color: themeMainTextColor,
+                    color: textColor,
                 },
             },
         },
         MuiSlider: {
             styleOverrides: {
                 root: ({ theme }) => ({
-                    // Ensure consistent spacing across all breakpoints
                     [theme.breakpoints.up("xs")]: {
                         marginBottom: "18px",
                         paddingTop: "0px",
@@ -178,13 +131,11 @@ const theme = createTheme({
                 }),
                 track: {
                     border: "none",
-                    background:
-                        // "linear-gradient(90deg, #4af792 0%, #00c6ff 100%)",
-                        "linear-gradient(90deg,rgba(73, 230, 136, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(76, 230, 137, 1) 100%)",
+                    background: `linear-gradient(90deg, ${accentColor} 0%, ${textColor} 50%, ${accentColor} 100%)`,
                 },
                 thumb: {
-                    backgroundColor: themeMainTextColor,
-                    border: `2px solid ${darkThemeSurfaceColor_1}`,
+                    backgroundColor: textColor,
+                    border: `2px solid ${surface[1]}`,
                     width: 18,
                     height: 18,
                 },
@@ -215,17 +166,17 @@ const theme = createTheme({
         MuiOutlinedInput: {
             styleOverrides: {
                 notchedOutline: {
-                    borderColor: darkThemeSurfaceColor_4,
+                    borderColor: surface[4],
                 },
                 root: {
                     "&:hover": {
                         "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: darkThemeSurfaceColor_5,
+                            borderColor: surface[5],
                         },
                     },
                     "&.Mui-focused": {
                         "& .MuiOutlinedInput-notchedOutline": {
-                            borderColor: darkThemeSurfaceColor_5,
+                            borderColor: surface[5],
                         },
                     },
                 },
@@ -235,7 +186,7 @@ const theme = createTheme({
             styleOverrides: {
                 root: {
                     ".MuiSelect-icon": {
-                        color: themeMainTextColor,
+                        color: textColor,
                     },
                 },
             },
@@ -243,21 +194,21 @@ const theme = createTheme({
         MuiIconButton: {
             styleOverrides: {
                 root: {
-                    "&.Mui-disabled": { color: darkThemeSurfaceColor_4 },
+                    "&.Mui-disabled": { color: surface[4] },
                 },
             },
         },
         MuiDivider: {
             styleOverrides: {
                 root: {
-                    borderColor: darkThemeSurfaceColor_3,
+                    borderColor: surface[3],
                 },
             },
         },
         MuiMenu: {
             styleOverrides: {
                 paper: {
-                    backgroundColor: darkThemeSurfaceColor_5,
+                    backgroundColor: surface[5],
                 },
                 list: { paddingTop: 0, paddingBottom: 0 },
             },
@@ -265,31 +216,31 @@ const theme = createTheme({
         MuiMenuItem: {
             styleOverrides: {
                 root: {
-                    color: themeMainTextColor,
-                    backgroundColor: darkThemeSurfaceColor_5,
+                    color: textColor,
+                    backgroundColor: surface[5],
                     // Ripple previews the destination color (unselected → will become selected)
                     "& .MuiTouchRipple-root": {
-                        color: darkThemeSurfaceColor_3,
+                        color: surface[3],
                     },
                     "&:hover": {
-                        backgroundColor: darkThemeSurfaceColor_4,
+                        backgroundColor: surface[4],
                     },
                     // Keyboard-focused (arrow key navigation): no background change
                     "&.Mui-focusVisible": {
-                        backgroundColor: darkThemeSurfaceColor_5,
+                        backgroundColor: surface[5],
                     },
                     "&.Mui-selected": {
-                        backgroundColor: darkThemeSurfaceColor_3,
+                        backgroundColor: surface[3],
                         // Ripple previews the destination color (selected → will become unselected)
                         "& .MuiTouchRipple-root": {
-                            color: darkThemeSurfaceColor_5,
+                            color: surface[5],
                         },
                         "&:hover": {
-                            backgroundColor: darkThemeSurfaceColor_4,
+                            backgroundColor: surface[4],
                         },
                         // Keyboard-focused selected item: keep selected color
                         "&.Mui-focusVisible": {
-                            backgroundColor: darkThemeSurfaceColor_3,
+                            backgroundColor: surface[3],
                         },
                     },
                 },
