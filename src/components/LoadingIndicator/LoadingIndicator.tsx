@@ -36,15 +36,9 @@ export default function LoadingIndicator({
                               backgroundColor: theme.darkThemeSurfaceColor_1,
                           }
                         : {
-                              position: "fixed",
-                              top: {
-                                  xs: theme.appBarHeightXs,
-                                  md: theme.appBarHeightMd,
-                              },
-                              left: 0,
-                              right: 0,
-                              bottom: 0,
+                              // Initial load: fills the area the Layout reserves below the header
                               width: "100%",
+                              height: "100%",
                               display: "flex",
                               justifyContent: "center",
                               alignItems: "center",

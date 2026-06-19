@@ -1,28 +1,25 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { orderBy } from "natural-orderby";
 import Box from "@mui/material/Box";
+import Fade from "@mui/material/Fade";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import EnhancedTable from "./EnhancedTable/EnhancedTable";
 import EnhancedTablePagination from "./EnhancedTable/EnhancedTablePagination/EnhancedTablePagination";
+import LoadingIndicator from "../LoadingIndicator/LoadingIndicator";
 
 import type DisplayedData from "../../types/DisplayedData";
 import { useData } from "../../contexts/DataContext";
+import { usePlayersData } from "../../contexts/PlayersDataContext";
 
-type Props = {
-    displayedPositions: string[];
-    displayedTeams: string[];
-    playerPriceRange: string[];
-    gameweekRange: number[];
-};
-
-export default function PlayerDataTable(props: Props) {
+export default function PlayerDataTable() {
     const {
+        isRefetching,
         displayedPositions,
         displayedTeams,
         playerPriceRange,
         gameweekRange,
-    } = props;
+    } = usePlayersData();
 
     const [page, setPage] = useState<number>(0);
     const [rowsPerPage, setRowsPerPage] = useState<number>(50);
@@ -60,7 +57,7 @@ export default function PlayerDataTable(props: Props) {
                 displayedPositions.includes(player.fpl_player_position),
             )
             .map((player) => {
-                const s = player.player_stats;
+                const playerStats = player.player_stats;
                 return {
                     rank: 0,
                     fplPlayerId: player.fpl_player_id,
@@ -70,21 +67,22 @@ export default function PlayerDataTable(props: Props) {
                     fplPlayerCost: player.fpl_player_cost.toFixed(1),
                     fplSelectedByPercent:
                         player.fpl_selected_by_percent.toFixed(1),
-                    gamesPlayed: s.games_played,
-                    sumMinutes: s.sum_minutes,
-                    sumxG: s.sum_xg.toFixed(1),
-                    sumxA: s.sum_xa.toFixed(1),
-                    sumxGI: s.sum_xgi.toFixed(1),
-                    sumxGAP: s.sum_xgap.toFixed(1),
-                    sumShotsOnTarget: s.sum_shots_on_target,
-                    sumBigChancesCreated: s.sum_big_chances_created,
-                    sumKeyPasses: s.sum_key_passes,
-                    sumPoints: s.sum_points,
-                    sumGoals: s.sum_goals,
-                    sumAssists: s.sum_assists,
-                    sumDefensiveContributions: s.sum_defensive_contributions,
-                    sumBPS: s.sum_bps,
-                    sumCleansheets: s.sum_cleansheets,
+                    gamesPlayed: playerStats.games_played,
+                    sumMinutes: playerStats.sum_minutes,
+                    sumxG: playerStats.sum_xg.toFixed(1),
+                    sumxA: playerStats.sum_xa.toFixed(1),
+                    sumxGI: playerStats.sum_xgi.toFixed(1),
+                    sumxGAP: playerStats.sum_xgap.toFixed(1),
+                    sumShotsOnTarget: playerStats.sum_shots_on_target,
+                    sumBigChancesCreated: playerStats.sum_big_chances_created,
+                    sumKeyPasses: playerStats.sum_key_passes,
+                    sumPoints: playerStats.sum_points,
+                    sumGoals: playerStats.sum_goals,
+                    sumAssists: playerStats.sum_assists,
+                    sumDefensiveContributions:
+                        playerStats.sum_defensive_contributions,
+                    sumBPS: playerStats.sum_bps,
+                    sumCleansheets: playerStats.sum_cleansheets,
                 };
             });
     }, [players, displayedPositions]);
@@ -115,64 +113,73 @@ export default function PlayerDataTable(props: Props) {
     }, [rankedData, displayedTeams, playerPriceRange]);
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                height: { xs: "auto", md: "100%" },
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
-            {isSmallScreen ? (
+        <Box sx={{ height: { xs: "auto", md: "100%" } }}>
+            <LoadingIndicator variant="table" show={isRefetching} />
+            <Fade
+                in={!isRefetching}
+                timeout={{ enter: 300, exit: 200 }}
+                unmountOnExit
+            >
                 <Box
                     sx={{
-                        overflowX: "auto",
-                        overflowY: "visible",
                         width: "100%",
-                        overscrollBehaviorX: "none",
-                        overscrollBehaviorY: "none",
-                    }}
-                    onWheel={(e) => {
-                        if (
-                            e.deltaY !== 0 &&
-                            Math.abs(e.deltaY) > Math.abs(e.deltaX)
-                        ) {
-                            window.scrollBy({
-                                top: e.deltaY,
-                                behavior: "auto",
-                            });
-                        }
+                        height: { xs: "auto", md: "100%" },
+                        display: "flex",
+                        flexDirection: "column",
                     }}
                 >
-                    <EnhancedTable
-                        ref={tableRef}
+                    {isSmallScreen ? (
+                        <Box
+                            sx={{
+                                overflowX: "auto",
+                                overflowY: "visible",
+                                width: "100%",
+                                overscrollBehaviorX: "none",
+                                overscrollBehaviorY: "none",
+                            }}
+                            onWheel={(e) => {
+                                if (
+                                    e.deltaY !== 0 &&
+                                    Math.abs(e.deltaY) > Math.abs(e.deltaX)
+                                ) {
+                                    window.scrollBy({
+                                        top: e.deltaY,
+                                        behavior: "auto",
+                                    });
+                                }
+                            }}
+                        >
+                            <EnhancedTable
+                                ref={tableRef}
+                                rows={displayedData}
+                                page={page}
+                                rowsPerPage={rowsPerPage}
+                                order={order}
+                                orderBy={orderColumn}
+                                onRequestSort={handleRequestSort}
+                            />
+                        </Box>
+                    ) : (
+                        <EnhancedTable
+                            ref={tableRef}
+                            rows={displayedData}
+                            page={page}
+                            rowsPerPage={rowsPerPage}
+                            order={order}
+                            orderBy={orderColumn}
+                            onRequestSort={handleRequestSort}
+                        />
+                    )}
+                    <EnhancedTablePagination
                         rows={displayedData}
-                        page={page}
                         rowsPerPage={rowsPerPage}
-                        order={order}
-                        orderBy={orderColumn}
-                        onRequestSort={handleRequestSort}
+                        page={page}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
+                        scrollToTop={scrollToTop}
                     />
                 </Box>
-            ) : (
-                <EnhancedTable
-                    ref={tableRef}
-                    rows={displayedData}
-                    page={page}
-                    rowsPerPage={rowsPerPage}
-                    order={order}
-                    orderBy={orderColumn}
-                    onRequestSort={handleRequestSort}
-                />
-            )}
-            <EnhancedTablePagination
-                rows={displayedData}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                scrollToTop={scrollToTop}
-            />
+            </Fade>
         </Box>
     );
 }
